@@ -2,8 +2,13 @@ package com.kuluruvineeth.restaurantfinder
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
@@ -18,11 +23,20 @@ import androidx.compose.ui.unit.dp
 @Preview(showBackground = true)
 @Composable
 fun RestaurantsScreen() {
-    RestaurantItem()
+    LazyColumn(
+        contentPadding = PaddingValues(
+            vertical = 8.dp,
+            horizontal = 8.dp
+        )
+    ) {
+        items(dummyRestaurants) { restaurant ->
+            RestaurantItem(item = restaurant)
+        }
+    }
 }
 
 @Composable
-fun RestaurantItem(){
+fun RestaurantItem(item: Restaurant){
     Card(
         elevation = 4.dp,
         modifier = Modifier.padding(8.dp)
@@ -35,7 +49,11 @@ fun RestaurantItem(){
                 Icons.Filled.Place,
                 Modifier.weight(0.15f)
             )
-            RestaurantDetails(Modifier.weight(0.85f))
+            RestaurantDetails(
+                item.title,
+                item.description,
+                Modifier.weight(0.85f)
+            )
         }
     }
 }
@@ -50,19 +68,23 @@ private fun RestaurantIcon(icon: ImageVector, modifier: Modifier){
 }
 
 @Composable
-private fun RestaurantDetails(modifier: Modifier){
+private fun RestaurantDetails(
+    title: String,
+    description: String,
+    modifier: Modifier
+){
     Column(
         modifier = modifier
     ) {
         Text(
-            text = "Alfred's dishes",
+            text = title,
             style = MaterialTheme.typography.h6
         )
         CompositionLocalProvider(
             LocalContentAlpha provides ContentAlpha.medium
         ) {
             Text(
-                text = "At Alfredo's... seafood dishes.",
+                text = description,
                 style = MaterialTheme.typography.body2
             )
         }
