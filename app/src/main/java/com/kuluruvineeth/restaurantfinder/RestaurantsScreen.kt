@@ -2,10 +2,7 @@ package com.kuluruvineeth.restaurantfinder
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -30,23 +27,33 @@ fun RestaurantsScreen(
     onItemClick: (id: Int) -> Unit = {}
 ) {
     val viewModel: RestaurantsViewModel = viewModel()
-    LazyColumn(
-        contentPadding = PaddingValues(
-            vertical = 8.dp,
-            horizontal = 8.dp
-        )
+    val state = viewModel.state.value
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
     ) {
-        items(viewModel.state.value) { restaurant ->
-            RestaurantItem(
-                item = restaurant,
-                onFavoriteClick = {
-                    id,oldValue -> viewModel.toggleFavorite(id,oldValue)
+        LazyColumn(
+            contentPadding = PaddingValues(
+                vertical = 8.dp,
+                horizontal = 8.dp
+            )
+        ) {
+            items(state.restaurants) { restaurant ->
+                RestaurantItem(
+                    item = restaurant,
+                    onFavoriteClick = {
+                            id,oldValue -> viewModel.toggleFavorite(id,oldValue)
+                    }
+                ){
+                        id ->
+                    onItemClick(id)
                 }
-            ){
-                id ->
-                onItemClick(id)
             }
         }
+        if(state.isLoading)
+            CircularProgressIndicator()
+        if(state.error!=null)
+            Text(state.error)
     }
 }
 
@@ -62,7 +69,8 @@ fun RestaurantItem(
         Icons.Filled.FavoriteBorder
     Card(
         elevation = 4.dp,
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .padding(8.dp)
             .clickable { onItemClick(item.id) }
     ) {
         Row(
