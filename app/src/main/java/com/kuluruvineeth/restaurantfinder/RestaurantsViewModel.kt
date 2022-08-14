@@ -3,6 +3,7 @@ package com.kuluruvineeth.restaurantfinder
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -15,8 +16,6 @@ class RestaurantsViewModel(
 ) : ViewModel() {
     private var restInterface: RestaurantsApiService
     val state = mutableStateOf(emptyList<Restaurant>())
-    val job = Job()
-    private val scope = CoroutineScope(job+Dispatchers.IO)
     init {
         val retrofit: Retrofit = Retrofit.Builder()
             .addConverterFactory(
@@ -33,7 +32,7 @@ class RestaurantsViewModel(
     }
 
     private fun getRestaurants(){
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val restaurants = restInterface.getRestaurants()
             withContext(Dispatchers.Main){
                 state.value = restaurants.restoreSelections()
@@ -78,6 +77,5 @@ class RestaurantsViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        job.cancel()
     }
 }
