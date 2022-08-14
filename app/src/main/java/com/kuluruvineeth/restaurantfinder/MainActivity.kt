@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.kuluruvineeth.restaurantfinder.ui.theme.RestaurantFinderTheme
 
 class MainActivity : ComponentActivity() {
@@ -44,6 +45,10 @@ private fun RestaurantApp(){
             route="restaurants/{restaurant_id}",
             arguments = listOf(navArgument("restaurant_id"){
                 type = NavType.IntType
+            }),
+            deepLinks = listOf(navDeepLink {
+                uriPattern =
+                    "www.restaurantsapp.details.com/{restaurant_id}"
             })
         ){
             RestaurantDetailsScreen()
