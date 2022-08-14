@@ -1,15 +1,16 @@
-package com.kuluruvineeth.restaurantfinder
+package com.kuluruvineeth.restaurantfinder.restaurants.presentation.details
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kuluruvineeth.restaurantfinder.restaurants.data.remote.RestaurantsApiService
+import com.kuluruvineeth.restaurantfinder.restaurants.domain.Restaurant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 
 class RestaurantDetailsViewModel(
     private val stateHandle: SavedStateHandle
@@ -31,10 +32,16 @@ class RestaurantDetailsViewModel(
         }
     }
 
-    private suspend fun getRemoteRestaurant(id: Int): Restaurant{
+    private suspend fun getRemoteRestaurant(id: Int): Restaurant {
         return withContext(Dispatchers.IO){
             val responseMap = restInterface.getRestaurant(id)
-            return@withContext responseMap.values.first()
+            return@withContext responseMap.values.first().let {
+                Restaurant(
+                    id=it.id,
+                    title = it.title,
+                    description = it.description
+                )
+            }
         }
     }
 }

@@ -1,20 +1,20 @@
-package com.kuluruvineeth.restaurantfinder
+package com.kuluruvineeth.restaurantfinder.restaurants.presentation.list
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kuluruvineeth.restaurantfinder.restaurants.domain.GetInitialRestaurantsUseCase
+import com.kuluruvineeth.restaurantfinder.restaurants.domain.ToggleRestaurantUseCase
+import com.kuluruvineeth.restaurantfinder.restaurants.presentation.list.RestaurantsScreenState
 import kotlinx.coroutines.*
-import retrofit2.*
-import retrofit2.converter.gson.GsonConverterFactory
-import java.net.ConnectException
-import java.net.UnknownHostException
 
 class RestaurantsViewModel(
     private val _stateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val repository = RestaurantsRepository()
+    private val getRestaurantsUseCase = GetInitialRestaurantsUseCase()
+    private val toggleRestaurantUseCase = ToggleRestaurantUseCase()
     private val _state = mutableStateOf(
         RestaurantsScreenState(
             restaurants = listOf(),
@@ -37,7 +37,7 @@ class RestaurantsViewModel(
 
     private fun getRestaurants(){
         viewModelScope.launch(errorHandler) {
-            val restaurants = repository.getAllRestaurants()
+            val restaurants = getRestaurantsUseCase()
             _state.value = _state.value.copy(
                 restaurants = restaurants,
                 isLoading = false
@@ -47,7 +47,7 @@ class RestaurantsViewModel(
 
     fun toggleFavorite(id:Int,oldValue: Boolean){
         viewModelScope.launch(errorHandler) {
-            val updatedRestaurants = repository.toggleFavoriteRestaurant(id,oldValue)
+            val updatedRestaurants = toggleRestaurantUseCase(id,oldValue)
             _state.value = _state.value.copy(
                 restaurants = updatedRestaurants
             )
