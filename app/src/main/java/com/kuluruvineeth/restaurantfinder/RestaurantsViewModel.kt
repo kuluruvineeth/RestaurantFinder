@@ -47,21 +47,36 @@ class RestaurantsViewModel(
     private suspend fun getAllRestaurants(): List<Restaurant>{
         return withContext(Dispatchers.IO){
             try{
-                val restaurants = restInterface.getRestaurants()
-                restaurantsDao.addAll(restaurants)
-                return@withContext restaurants
+                refreshCache()
             }catch (e:Exception){
                 when(e){
                     is UnknownHostException,
                     is ConnectException,
                     is HttpException -> {
-                        return@withContext restaurantsDao.getAll()
+                        if(restaurantsDao.getAll().isEmpty())
+                            throw Exception(
+                                "Something went wrong. " +
+                                        "We have no data."
+                            )
                     }
                     else -> throw e
                 }
             }
-
+            return@withContext restaurantsDao.getAll()
         }
+    }
+
+    private suspend fun refreshCache(){
+        val remoteRestaurants = restInterface
+            .getRestaurants()
+        val favoriteRestaurants = restaurantsDao
+            .getAllFavorited()
+        restaurantsDao.addAll(remoteRestaurants)
+        restaurantsDao.updateAll(
+            favoriteRestaurants.map{
+                PartialRestaurant(it.id,true)
+            }
+        )
     }
 
     fun toggleFavorite(id:Int){
@@ -71,8 +86,9 @@ class RestaurantsViewModel(
         restaurants[itemIndex] = item.copy(isFavorite = !item.isFavorite)
         storeSelection(restaurants[itemIndex])
         state.value = restaurants
-        viewModelScope.launch {
-            toggleFavoriteRestaurant(id,item.isFavorite)
+        viewModelScope.launch(errorHandler) {
+            val updatedRestaurants = toggleFavoriteRestaurant(id,item.isFavorite)
+            state.value = updatedRestaurants
         }
     }
 
@@ -108,6 +124,7 @@ class RestaurantsViewModel(
                     isFavorite = !oldValue
                 )
             )
+            restaurantsDao.getAll()
         }
 
     companion object{
