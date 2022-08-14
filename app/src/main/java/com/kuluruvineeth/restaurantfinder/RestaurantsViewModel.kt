@@ -3,6 +3,7 @@ package com.kuluruvineeth.restaurantfinder
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -14,8 +15,8 @@ class RestaurantsViewModel(
 ) : ViewModel() {
     private var restInterface: RestaurantsApiService
     val state = mutableStateOf(emptyList<Restaurant>())
-    private lateinit var restaurantsCall :
-            Call<List<Restaurant>>
+    val job = Job()
+    private val scope = CoroutineScope(job+Dispatchers.IO)
     init {
         val retrofit: Retrofit = Retrofit.Builder()
             .addConverterFactory(
@@ -32,23 +33,12 @@ class RestaurantsViewModel(
     }
 
     private fun getRestaurants(){
-        restaurantsCall = restInterface.getRestaurants()
-        restaurantsCall.enqueue(
-            object : Callback<List<Restaurant>>{
-                override fun onResponse(
-                    call: Call<List<Restaurant>>,
-                    response: Response<List<Restaurant>>
-                ) {
-                    response.body()?.let { restaurants ->
-                        state.value = restaurants.restoreSelections()
-                    }
-                }
-
-                override fun onFailure(call: Call<List<Restaurant>>, t: Throwable) {
-                    t.printStackTrace()
-                }
+        scope.launch {
+            val restaurants = restInterface.getRestaurants()
+            withContext(Dispatchers.Main){
+                state.value = restaurants.restoreSelections()
             }
-        )
+        }
     }
 
     fun toggleFavorite(id:Int){
@@ -88,6 +78,6 @@ class RestaurantsViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        restaurantsCall.cancel()
+        job.cancel()
     }
 }
