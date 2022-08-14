@@ -26,7 +26,9 @@ import org.intellij.lang.annotations.JdkConstants
 
 @Preview(showBackground = true)
 @Composable
-fun RestaurantsScreen() {
+fun RestaurantsScreen(
+    onItemClick: (id: Int) -> Unit = {}
+) {
     val viewModel: RestaurantsViewModel = viewModel()
     LazyColumn(
         contentPadding = PaddingValues(
@@ -35,9 +37,14 @@ fun RestaurantsScreen() {
         )
     ) {
         items(viewModel.state.value) { restaurant ->
-            RestaurantItem(item = restaurant){
+            RestaurantItem(
+                item = restaurant,
+                onFavoriteClick = {
+                    id -> viewModel.toggleFavorite(id)
+                }
+            ){
                 id ->
-                viewModel.toggleFavorite(id)
+                onItemClick(id)
             }
         }
     }
@@ -46,7 +53,8 @@ fun RestaurantsScreen() {
 @Composable
 fun RestaurantItem(
     item: Restaurant,
-    onClick: (id: Int) -> Unit
+    onFavoriteClick: (id: Int) -> Unit,
+    onItemClick: (id:Int) -> Unit
 ){
     val icon = if(item.isFavorite)
         Icons.Filled.Favorite
@@ -55,6 +63,7 @@ fun RestaurantItem(
     Card(
         elevation = 4.dp,
         modifier = Modifier.padding(8.dp)
+            .clickable { onItemClick(item.id) }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -73,7 +82,7 @@ fun RestaurantItem(
                 icon,
                 Modifier.weight(0.15f)
             ){
-                onClick(item.id)
+                onFavoriteClick(item.id)
             }
         }
     }
