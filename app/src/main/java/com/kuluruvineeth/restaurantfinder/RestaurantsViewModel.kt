@@ -16,6 +16,9 @@ class RestaurantsViewModel(
 ) : ViewModel() {
     private var restInterface: RestaurantsApiService
     val state = mutableStateOf(emptyList<Restaurant>())
+    private val errorHandler = CoroutineExceptionHandler { _, exception ->
+        exception.printStackTrace()
+    }
     init {
         val retrofit: Retrofit = Retrofit.Builder()
             .addConverterFactory(
@@ -32,11 +35,15 @@ class RestaurantsViewModel(
     }
 
     private fun getRestaurants(){
-        viewModelScope.launch(Dispatchers.IO) {
-            val restaurants = restInterface.getRestaurants()
-            withContext(Dispatchers.Main){
-                state.value = restaurants.restoreSelections()
-            }
+        viewModelScope.launch(errorHandler) {
+            val restaurants = getRemoteRestaurants()
+            state.value = restaurants.restoreSelections()
+        }
+    }
+
+    private suspend fun getRemoteRestaurants(): List<Restaurant>{
+        return withContext(Dispatchers.IO){
+            restInterface.getRestaurants()
         }
     }
 
@@ -73,9 +80,5 @@ class RestaurantsViewModel(
 
     companion object{
         const val FAVORITES = "favorites"
-    }
-
-    override fun onCleared() {
-        super.onCleared()
     }
 }
