@@ -39,8 +39,7 @@ class RestaurantsViewModel(
 
     private fun getRestaurants(){
         viewModelScope.launch(errorHandler) {
-            val restaurants = getAllRestaurants()
-            state.value = restaurants.restoreSelections()
+            state.value = getAllRestaurants()
         }
     }
 
@@ -79,41 +78,11 @@ class RestaurantsViewModel(
         )
     }
 
-    fun toggleFavorite(id:Int){
-        val restaurants = state.value.toMutableList()
-        val itemIndex = restaurants.indexOfFirst { it.id == id }
-        val item = restaurants[itemIndex]
-        restaurants[itemIndex] = item.copy(isFavorite = !item.isFavorite)
-        storeSelection(restaurants[itemIndex])
-        state.value = restaurants
+    fun toggleFavorite(id:Int,oldValue: Boolean){
         viewModelScope.launch(errorHandler) {
-            val updatedRestaurants = toggleFavoriteRestaurant(id,item.isFavorite)
+            val updatedRestaurants = toggleFavoriteRestaurant(id,oldValue)
             state.value = updatedRestaurants
         }
-    }
-
-    private fun storeSelection(item: Restaurant){
-        val savedToggled = stateHandle
-            .get<List<Int>?>(FAVORITES)
-            .orEmpty().toMutableList()
-        if(item.isFavorite) savedToggled.add(item.id)
-        else savedToggled.remove(item.id)
-        stateHandle[FAVORITES] = savedToggled
-    }
-
-    private fun List<Restaurant>.restoreSelections():
-            List<Restaurant>{
-        stateHandle.get<List<Int>?>(FAVORITES)?.let {
-            selectedIds ->
-            val restaurantsMap = this.associateBy { it.id }
-                .toMutableMap()
-            selectedIds.forEach { id ->
-                val restaurant = restaurantsMap[id] ?: return@forEach
-                restaurantsMap[id] = restaurant.copy(isFavorite = true)
-            }
-            return restaurantsMap.values.toList()
-        }
-        return this
     }
 
     private suspend fun toggleFavoriteRestaurant(id:Int, oldValue: Boolean) =
@@ -126,8 +95,4 @@ class RestaurantsViewModel(
             )
             restaurantsDao.getAll()
         }
-
-    companion object{
-        const val FAVORITES = "favorites"
-    }
 }

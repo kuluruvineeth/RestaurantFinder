@@ -40,7 +40,7 @@ fun RestaurantsScreen(
             RestaurantItem(
                 item = restaurant,
                 onFavoriteClick = {
-                    id -> viewModel.toggleFavorite(id)
+                    id,oldValue -> viewModel.toggleFavorite(id,oldValue)
                 }
             ){
                 id ->
@@ -53,7 +53,7 @@ fun RestaurantsScreen(
 @Composable
 fun RestaurantItem(
     item: Restaurant,
-    onFavoriteClick: (id: Int) -> Unit,
+    onFavoriteClick: (id: Int,oldValue: Boolean) -> Unit,
     onItemClick: (id:Int) -> Unit
 ){
     val icon = if(item.isFavorite)
@@ -82,7 +82,7 @@ fun RestaurantItem(
                 icon,
                 Modifier.weight(0.15f)
             ){
-                onFavoriteClick(item.id)
+                onFavoriteClick(item.id,item.isFavorite)
             }
         }
     }
