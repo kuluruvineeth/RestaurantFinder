@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.intellij.lang.annotations.JdkConstants
 
 @Preview(showBackground = true)
 @Composable
@@ -79,7 +80,7 @@ fun RestaurantItem(
 }
 
 @Composable
-private fun RestaurantIcon(
+public fun RestaurantIcon(
     icon: ImageVector,
     modifier: Modifier,
     onClick: () -> Unit={})
@@ -94,13 +95,15 @@ private fun RestaurantIcon(
 }
 
 @Composable
-private fun RestaurantDetails(
+public fun RestaurantDetails(
     title: String,
     description: String,
-    modifier: Modifier
+    modifier: Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
 ){
     Column(
-        modifier = modifier
+        modifier = modifier,
+        horizontalAlignment = horizontalAlignment
     ) {
         Text(
             text = title,
