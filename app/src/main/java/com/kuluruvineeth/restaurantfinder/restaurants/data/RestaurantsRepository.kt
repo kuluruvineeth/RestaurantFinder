@@ -2,11 +2,13 @@ package com.kuluruvineeth.restaurantfinder.restaurants.data
 
 import com.kuluruvineeth.restaurantfinder.PartialLocalRestaurant
 import com.kuluruvineeth.restaurantfinder.RestaurantsApplication
+import com.kuluruvineeth.restaurantfinder.restaurants.data.di.IoDispatcher
 import com.kuluruvineeth.restaurantfinder.restaurants.data.local.LocalRestaurant
 import com.kuluruvineeth.restaurantfinder.restaurants.data.local.RestaurantsDao
 import com.kuluruvineeth.restaurantfinder.restaurants.data.local.RestaurantsDb
 import com.kuluruvineeth.restaurantfinder.restaurants.data.remote.RestaurantsApiService
 import com.kuluruvineeth.restaurantfinder.restaurants.domain.Restaurant
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -20,11 +22,12 @@ import javax.inject.Singleton
 @Singleton
 class RestaurantsRepository @Inject constructor(
     private val restInterface: RestaurantsApiService,
-    private val restaurantsDao: RestaurantsDao
+    private val restaurantsDao: RestaurantsDao,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher
 )  {
 
     suspend fun loadRestaurants(){
-        return withContext(Dispatchers.IO){
+        return withContext(dispatcher){
             try{
                 refreshCache()
             }catch (e:Exception){
@@ -64,7 +67,7 @@ class RestaurantsRepository @Inject constructor(
         )
     }
     suspend fun toggleFavoriteRestaurant(id:Int, value: Boolean) =
-        withContext(Dispatchers.IO){
+        withContext(dispatcher){
             restaurantsDao.update(
                 PartialLocalRestaurant(
                     id = id,
@@ -74,7 +77,7 @@ class RestaurantsRepository @Inject constructor(
         }
 
     suspend fun getRestaurants() : List<Restaurant>{
-        return withContext(Dispatchers.IO){
+        return withContext(dispatcher){
             return@withContext restaurantsDao.getAll().map {
                 Restaurant(it.id,it.title,it.description,it.isFavorite)
             }
