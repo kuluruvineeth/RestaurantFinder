@@ -3,6 +3,7 @@ package com.kuluruvineeth.restaurantfinder.restaurants.data
 import com.kuluruvineeth.restaurantfinder.PartialLocalRestaurant
 import com.kuluruvineeth.restaurantfinder.RestaurantsApplication
 import com.kuluruvineeth.restaurantfinder.restaurants.data.local.LocalRestaurant
+import com.kuluruvineeth.restaurantfinder.restaurants.data.local.RestaurantsDao
 import com.kuluruvineeth.restaurantfinder.restaurants.data.local.RestaurantsDb
 import com.kuluruvineeth.restaurantfinder.restaurants.data.remote.RestaurantsApiService
 import com.kuluruvineeth.restaurantfinder.restaurants.domain.Restaurant
@@ -13,22 +14,14 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.ConnectException
 import java.net.UnknownHostException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RestaurantsRepository {
-    private var restInterface: RestaurantsApiService =
-        Retrofit.Builder()
-            .addConverterFactory(
-                GsonConverterFactory.create()
-            )
-            .baseUrl(
-                "https://restaurantfinder-6446a-default-rtdb.firebaseio.com/"
-            )
-            .build()
-            .create(RestaurantsApiService::class.java)
-    private var restaurantsDao = RestaurantsDb
-        .getDaoInstance(
-            RestaurantsApplication.getAppContext()
-        )
+@Singleton
+class RestaurantsRepository @Inject constructor(
+    private val restInterface: RestaurantsApiService,
+    private val restaurantsDao: RestaurantsDao
+)  {
 
     suspend fun loadRestaurants(){
         return withContext(Dispatchers.IO){

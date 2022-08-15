@@ -2,19 +2,20 @@ package com.kuluruvineeth.restaurantfinder.restaurants.presentation.list
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kuluruvineeth.restaurantfinder.restaurants.domain.GetInitialRestaurantsUseCase
 import com.kuluruvineeth.restaurantfinder.restaurants.domain.ToggleRestaurantUseCase
-import com.kuluruvineeth.restaurantfinder.restaurants.presentation.list.RestaurantsScreenState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import javax.inject.Inject
 
-class RestaurantsViewModel(
-    private val _stateHandle: SavedStateHandle
+@HiltViewModel
+class RestaurantsViewModel @Inject constructor(
+    private val getRestaurantsUseCase : GetInitialRestaurantsUseCase,
+    private val toggleRestaurantUseCase : ToggleRestaurantUseCase
 ) : ViewModel() {
-    private val getRestaurantsUseCase = GetInitialRestaurantsUseCase()
-    private val toggleRestaurantUseCase = ToggleRestaurantUseCase()
+
     private val _state = mutableStateOf(
         RestaurantsScreenState(
             restaurants = listOf(),
