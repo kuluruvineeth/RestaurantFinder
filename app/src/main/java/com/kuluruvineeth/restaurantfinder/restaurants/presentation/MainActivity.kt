@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,6 +14,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.kuluruvineeth.restaurantfinder.RestaurantDetailsScreen
 import com.kuluruvineeth.restaurantfinder.RestaurantsScreen
+import com.kuluruvineeth.restaurantfinder.restaurants.presentation.list.RestaurantsViewModel
 import com.kuluruvineeth.restaurantfinder.ui.theme.RestaurantFinderTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,10 +35,16 @@ private fun RestaurantApp(){
     val navController = rememberNavController()
     NavHost(navController, startDestination = "restaurants"){
         composable(route="restaurants"){
-            RestaurantsScreen{
-                id->
-                navController.navigate("restaurants/$id")
-            }
+            val viewModel: RestaurantsViewModel = viewModel()
+            RestaurantsScreen(
+                state = viewModel.state.value,
+                onItemClick = {id ->
+                    navController.navigate("restaurants/$id")
+                },
+                onFavoriteClick = {id,oldValue ->
+                    viewModel.toggleFavorite(id,oldValue)
+                }
+            )
         }
         composable(
             route="restaurants/{restaurant_id}",

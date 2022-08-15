@@ -18,15 +18,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuluruvineeth.restaurantfinder.restaurants.domain.Restaurant
+import com.kuluruvineeth.restaurantfinder.restaurants.presentation.list.RestaurantsScreenState
 import com.kuluruvineeth.restaurantfinder.restaurants.presentation.list.RestaurantsViewModel
+import com.kuluruvineeth.restaurantfinder.ui.theme.RestaurantFinderTheme
 
-@Preview(showBackground = true)
+
 @Composable
 fun RestaurantsScreen(
-    onItemClick: (id: Int) -> Unit = {}
+    state: RestaurantsScreenState,
+    onItemClick: (id: Int) -> Unit,
+    onFavoriteClick: (id: Int, oldValue: Boolean) -> Unit
 ) {
-    val viewModel: RestaurantsViewModel = viewModel()
-    val state = viewModel.state.value
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
@@ -41,7 +43,7 @@ fun RestaurantsScreen(
                 RestaurantItem(
                     item = restaurant,
                     onFavoriteClick = {
-                            id,oldValue -> viewModel.toggleFavorite(id,oldValue)
+                            id,oldValue -> onFavoriteClick(id,oldValue)
                     }
                 ){
                         id ->
@@ -133,5 +135,17 @@ public fun RestaurantDetails(
                 style = MaterialTheme.typography.body2
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    RestaurantFinderTheme() {
+        RestaurantsScreen(
+            RestaurantsScreenState(listOf(), true),
+            {},
+            { _, _ -> }
+        )
     }
 }
