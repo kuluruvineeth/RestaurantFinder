@@ -14,10 +14,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuluruvineeth.restaurantfinder.restaurants.domain.Restaurant
+import com.kuluruvineeth.restaurantfinder.restaurants.presentation.Description
 import com.kuluruvineeth.restaurantfinder.restaurants.presentation.list.RestaurantsScreenState
 import com.kuluruvineeth.restaurantfinder.restaurants.presentation.list.RestaurantsViewModel
 import com.kuluruvineeth.restaurantfinder.ui.theme.RestaurantFinderTheme
@@ -52,7 +55,11 @@ fun RestaurantsScreen(
             }
         }
         if(state.isLoading)
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                Modifier.semantics {
+                    this.contentDescription = Description.RESTAURANTS_LOADING
+                }
+            )
         if(state.error!=null)
             Text(state.error)
     }
